@@ -116,6 +116,7 @@ def apply_rewrite(
 
 
 def optimize_one_heavy(session: DocumentSession) -> tuple[bool, str, int | None]:
+    """Optimize one heavy sentence and return (done, message, optimized_sentence_id)."""
     stop_heavy_ratio = load_config().get("optimization", {}).get("stop_heavy_ratio", 0.05)
     stats = compute_stats(session.items)
     if stats.heavy_ratio < stop_heavy_ratio:
