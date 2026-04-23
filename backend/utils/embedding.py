@@ -20,6 +20,7 @@ class EmbeddingService:
         self.local_model_name = cfg.get("local_model", "sentence-transformers/all-MiniLM-L6-v2")
         self.openai_model = cfg.get("openai_model", "text-embedding-3-small")
         self.openai_api_key = cfg.get("openai_api_key", "")
+        self._warned_hash_fallback = False
 
     @lru_cache(maxsize=1)
     def _local_model(self):
@@ -59,7 +60,9 @@ class EmbeddingService:
             return np.array(model.encode(texts, normalize_embeddings=True), dtype=np.float32)
         except Exception as exc:
             logger.warning("Local embedding failed, fallback to hash mode: %s", exc)
-            logger.warning("Using hash-based fallback embeddings; similarity quality may be reduced.")
+            if not self._warned_hash_fallback:
+                logger.warning("Using hash-based fallback embeddings; similarity quality may be reduced.")
+                self._warned_hash_fallback = True
             return np.array([self._hash_embedding(t) for t in texts], dtype=np.float32)
 
 

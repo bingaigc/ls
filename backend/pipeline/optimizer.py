@@ -13,7 +13,7 @@ def classify_level(similarity: float) -> str:
     heavy_threshold = classify_cfg.get("heavy", 0.93)
     medium_threshold = classify_cfg.get("medium", 0.85)
 
-    if similarity > heavy_threshold:
+    if similarity >= heavy_threshold:
         return "heavy"
     if medium_threshold <= similarity < heavy_threshold:
         return "medium"
