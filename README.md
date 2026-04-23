@@ -30,7 +30,7 @@ project/
 ## 后端运行
 
 ```bash
-cd /home/runner/work/ls/ls
+cd /path/to/project
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -40,7 +40,7 @@ uvicorn backend.app:app --reload --host 0.0.0.0 --port 8000
 ## 前端运行
 
 ```bash
-cd /home/runner/work/ls/ls/frontend
+cd /path/to/project/frontend
 npm install
 npm run dev
 ```
@@ -50,7 +50,7 @@ npm run dev
 
 ## 配置
 
-编辑 `/home/runner/work/ls/ls/config.yaml`：
+编辑项目根目录 `config.yaml`：
 
 - `embedding.mode`: `local` 或 `openai`
 - `embedding.openai_api_key`: OpenAI Key（openai 模式必填）

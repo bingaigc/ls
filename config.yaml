@@ -6,6 +6,9 @@ embedding:
 optimization:
   stop_heavy_ratio: 0.05
   max_iterations: 50
+classification:
+  heavy: 0.93
+  medium: 0.85
 server:
   host: 0.0.0.0
   port: 8000

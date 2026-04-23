@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from io import BytesIO
+import os
 from tempfile import NamedTemporaryFile
 from typing import List
 
@@ -41,56 +42,61 @@ def _make_chart_images(session: DocumentSession) -> tuple[str, str]:
 def build_pdf_report(session: DocumentSession) -> bytes:
     stats = compute_stats(session.items)
     pie_path, bar_path = _make_chart_images(session)
+    try:
+        out = BytesIO()
+        doc = SimpleDocTemplate(out, pagesize=A4)
+        styles = getSampleStyleSheet()
+        story: List = []
 
-    out = BytesIO()
-    doc = SimpleDocTemplate(out, pagesize=A4)
-    styles = getSampleStyleSheet()
-    story: List = []
+        story.append(Paragraph("论文优化分析报告", styles["Title"]))
+        story.append(Spacer(1, 12))
 
-    story.append(Paragraph("论文优化分析报告", styles["Title"]))
-    story.append(Spacer(1, 12))
-
-    overview = Table(
-        [
-            ["total", "heavy", "medium", "score"],
-            [str(stats.total), str(stats.heavy), str(stats.medium), str(stats.score)],
-        ]
-    )
-    overview.setStyle(
-        TableStyle(
+        overview = Table(
             [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-                ("GRID", (0, 0), (-1, -1), 1, colors.black),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ["total", "heavy", "medium", "score"],
+                [str(stats.total), str(stats.heavy), str(stats.medium), str(stats.score)],
             ]
         )
-    )
-    story.append(overview)
-    story.append(Spacer(1, 12))
-
-    story.append(Image(pie_path, width=240, height=180))
-    story.append(Spacer(1, 8))
-    story.append(Image(bar_path, width=240, height=180))
-    story.append(Spacer(1, 12))
-
-    story.append(Paragraph("优化前后对比", styles["Heading2"]))
-    for item in session.items:
-        if item.level == "heavy":
-            color = "red"
-        elif item.level == "medium":
-            color = "orange"
-        else:
-            color = "black"
-        story.append(
-            Paragraph(
-                f"<font color='{color}'>[{item.id}] 原文：{item.original}<br/>改写：{item.rewritten}</font>",
-                styles["BodyText"],
+        overview.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+                    ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                ]
             )
         )
-        story.append(Spacer(1, 6))
+        story.append(overview)
+        story.append(Spacer(1, 12))
 
-    doc.build(story)
-    return out.getvalue()
+        story.append(Image(pie_path, width=240, height=180))
+        story.append(Spacer(1, 8))
+        story.append(Image(bar_path, width=240, height=180))
+        story.append(Spacer(1, 12))
+
+        story.append(Paragraph("优化前后对比", styles["Heading2"]))
+        for item in session.items:
+            if item.level == "heavy":
+                color = "red"
+            elif item.level == "medium":
+                color = "orange"
+            else:
+                color = "black"
+            story.append(
+                Paragraph(
+                    f"<font color='{color}'>[{item.id}] 原文：{item.original}<br/>改写：{item.rewritten}</font>",
+                    styles["BodyText"],
+                )
+            )
+            story.append(Spacer(1, 6))
+
+        doc.build(story)
+        return out.getvalue()
+    finally:
+        if os.path.exists(pie_path):
+            os.unlink(pie_path)
+        if os.path.exists(bar_path):
+            os.unlink(bar_path)
 
 
 def build_text_report(session: DocumentSession) -> str:

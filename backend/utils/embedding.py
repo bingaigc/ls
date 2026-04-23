@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from functools import lru_cache
 from typing import List
 
@@ -8,6 +9,8 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 from backend.utils.config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingService:
@@ -48,13 +51,14 @@ class EmbeddingService:
                 resp = client.embeddings.create(model=self.openai_model, input=texts)
                 arr = np.array([d.embedding for d in resp.data], dtype=np.float32)
                 return arr
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("OpenAI embedding failed, fallback to local/hash mode: %s", exc)
 
         try:
             model = self._local_model()
             return np.array(model.encode(texts, normalize_embeddings=True), dtype=np.float32)
-        except Exception:
+        except Exception as exc:
+            logger.warning("Local embedding failed, fallback to hash mode: %s", exc)
             return np.array([self._hash_embedding(t) for t in texts], dtype=np.float32)
 
 

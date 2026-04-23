@@ -9,9 +9,13 @@ from backend.utils.text_ops import heavy_rewrite, simple_rewrite, split_sentence
 
 
 def classify_level(similarity: float) -> str:
-    if similarity > 0.93:
+    classify_cfg = load_config().get("classification", {})
+    heavy_threshold = classify_cfg.get("heavy", 0.93)
+    medium_threshold = classify_cfg.get("medium", 0.85)
+
+    if similarity > heavy_threshold:
         return "heavy"
-    if 0.85 <= similarity <= 0.93:
+    if medium_threshold <= similarity <= heavy_threshold:
         return "medium"
     return "safe"
 
