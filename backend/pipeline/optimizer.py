@@ -15,7 +15,7 @@ def classify_level(similarity: float) -> str:
 
     if similarity > heavy_threshold:
         return "heavy"
-    if medium_threshold <= similarity <= heavy_threshold:
+    if medium_threshold <= similarity < heavy_threshold:
         return "medium"
     return "safe"
 

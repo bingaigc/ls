@@ -59,6 +59,7 @@ class EmbeddingService:
             return np.array(model.encode(texts, normalize_embeddings=True), dtype=np.float32)
         except Exception as exc:
             logger.warning("Local embedding failed, fallback to hash mode: %s", exc)
+            logger.warning("Using hash-based fallback embeddings; similarity quality may be reduced.")
             return np.array([self._hash_embedding(t) for t in texts], dtype=np.float32)
 
 
