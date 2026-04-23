@@ -36,7 +36,7 @@ class EmbeddingService:
 
     @staticmethod
     def _hash_embedding(text: str, dim: int = 384) -> np.ndarray:
-        """Deterministic fallback embedding used only when OpenAI/local models are unavailable."""
+        """Deterministic availability fallback; semantic similarity quality is intentionally limited."""
         digest = hashlib.sha256(text.encode("utf-8")).digest()
         ints = np.frombuffer(digest * ((dim // len(digest)) + 1), dtype=np.uint8)[:dim]
         vec = ints.astype(np.float32)
